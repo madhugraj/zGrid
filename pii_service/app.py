@@ -1,9 +1,11 @@
 import os, json
 from pathlib import Path
 from typing import List, Dict, Any, Optional
-from fastapi import FastAPI
+
+from fastapi import FastAPI, Header, HTTPException, Depends
 from pydantic import BaseModel
 from dotenv import load_dotenv
+from fastapi.middleware.cors import CORSMiddleware
 
 # Load .env next to this file
 load_dotenv(dotenv_path=Path(__file__).parent / ".env", override=True)
@@ -14,7 +16,34 @@ from .utils import to_entity_dict, merge_spans, apply_redactions, is_generic_pre
 
 app = FastAPI(title="PII Protection Service", version="1.1.0")
 
-# Defaults from env
+# ----------------------------- CORS -----------------------------
+ALLOWED = os.getenv("CORS_ALLOWED_ORIGINS", "*")
+allow_origins = [o.strip() for o in ALLOWED.split(",")] if ALLOWED else ["*"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allow_origins,
+    allow_methods=["POST", "GET", "OPTIONS"],
+    allow_headers=["*"],
+)
+
+# ----------------------------- API Key Auth -----------------------------
+# Set PII_API_KEYS in .env as a comma-separated list: PII_API_KEYS=key1,key2
+_API_KEYS = set(k.strip() for k in (os.getenv("PII_API_KEYS", "")).split(",") if k.strip())
+
+def require_api_key(
+    x_api_key: Optional[str] = Header(default=None),
+    authorization: Optional[str] = Header(default=None),
+):
+    # If no keys configured, auth is disabled (useful for local/dev)
+    if not _API_KEYS:
+        return
+    token = x_api_key
+    if not token and authorization and authorization.lower().startswith("bearer "):
+        token = authorization.split(" ", 1)[1].strip()
+    if not token or token not in _API_KEYS:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+# ----------------------------- Defaults -----------------------------
 LANG = os.getenv("PRESIDIO_LANGUAGE", "en")
 DEFAULT_ENTITIES = [s.strip() for s in os.getenv("ENTITIES", "").split(",") if s.strip()]
 ENTITY_THRESHOLDS = json.loads(os.getenv("ENTITY_THRESHOLDS", "{}") or "{}")
@@ -29,6 +58,7 @@ GLINER_LABEL_MAP = {
 
 gliner = GlinerDetector()
 
+# ----------------------------- Schemas -----------------------------
 class ValidateRequest(BaseModel):
     text: str
     entities: Optional[List[str]] = None
@@ -53,11 +83,12 @@ class ValidateResponse(BaseModel):
     steps: List[Dict[str, Any]]
     reasons: List[str]
 
+# ----------------------------- Routes -----------------------------
 @app.get("/health")
 def health():
     return {"ok": True}
 
-@app.post("/validate", response_model=ValidateResponse)
+@app.post("/validate", response_model=ValidateResponse, dependencies=[Depends(require_api_key)])
 def validate(req: ValidateRequest):
     text = req.text or ""
     if not text.strip():
@@ -65,7 +96,7 @@ def validate(req: ValidateRequest):
             "status": "pass",
             "redacted_text": text,
             "entities": [],
-            "steps": [{"name":"noop","passed":True}],
+            "steps": [{"name": "noop", "passed": True}],
             "reasons": ["Empty text"],
         }
 
