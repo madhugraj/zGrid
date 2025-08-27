@@ -1,0 +1,12 @@
+fastapi==0.115.2
+uvicorn[standard]==0.30.6
+pydantic==1.10.15
+
+torch>=2.1.0
+transformers==4.22.1
+detoxify==0.5.1
+
+# Use NLTK instead of spaCy for sentence splitting (more compatible)
+nltk==3.8.1
+better-profanity==0.7.0
+python-dotenv==1.0.1
