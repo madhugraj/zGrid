@@ -1,0 +1,18 @@
+# venvs
+guards/
+guards311/
+tox_service/venv/
+# caches & big model files
+pii_service/models/
+**/__pycache__/
+*.pyc
+*.env
+.DS_Store
+guards/
+guards311/
+tox_service/venv/
+pii_service/models/
+**/__pycache__/
+*.pyc
+*.env
+.DS_Store

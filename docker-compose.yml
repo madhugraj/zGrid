@@ -13,14 +13,14 @@ services:
       - SPACY_MODEL=en_core_web_lg
       - GLINER_LOCAL_DIR=/app/models/gliner_small-v2.1
       - GLINER_MODEL=urchade/gliner_small-v2.1
-      - HF_HUB_OFFLINE=1
-      - TRANSFORMERS_OFFLINE=1
+      - HF_HUB_OFFLINE=0
+      - TRANSFORMERS_OFFLINE=0
       - ENTITIES=EMAIL_ADDRESS,PHONE_NUMBER,CREDIT_CARD,US_SSN,PERSON,LOCATION,IN_AADHAAR,IN_PAN
       - GLINER_THRESHOLD=0.45
       - GLINER_LABELS=person,location,organization
       - ENTITY_THRESHOLDS={"EMAIL_ADDRESS":0.3,"PHONE_NUMBER":0.3,"PERSON":0.35,"LOCATION":0.4}
       - PLACEHOLDERS={"DEFAULT":"[REDACTED]","EMAIL_ADDRESS":"[EMAIL]","PHONE_NUMBER":"[PHONE]","CREDIT_CARD":"[CARD]","US_SSN":"[SSN]","PERSON":"[PERSON]","LOCATION":"[LOCATION]","IN_AADHAAR":"[AADHAAR]","IN_PAN":"[PAN]"}
-      - CORS_ALLOWED_ORIGINS=https://preview--zgrid-feature-flow.lovable.app,http://localhost:3000,http://localhost:5173
+      - CORS_ALLOWED_ORIGINS=https://id-preview--109ab8ef-30df-4c09-81b3-bfad5373b1f0.lovable.app,https://preview--zgrid-feature-flow.lovable.app,http://localhost:3000,http://localhost:5173
       - PII_API_KEYS=supersecret123,piievalyavar
     volumes:
       - ./pii_service/models:/app/models:ro
@@ -49,7 +49,7 @@ services:
       - DETOXIFY_LABELS=toxicity,severe_toxicity,obscene,threat,insult,identity_attack,sexual_explicit
       - PROFANITY_ENABLED=1
       - PROFANITY_ACTION=mask
-      - CORS_ALLOWED_ORIGINS=https://preview--zgrid-feature-flow.lovable.app,http://localhost:3000,http://localhost:5173
+      - CORS_ALLOWED_ORIGINS=https://id-preview--109ab8ef-30df-4c09-81b3-bfad5373b1f0.lovable.app,https://preview--zgrid-feature-flow.lovable.app,http://localhost:3000,http://localhost:5173
       - TOX_API_KEYS=supersecret123,toxevalyavar
       - HF_HUB_OFFLINE=0
       - TRANSFORMERS_OFFLINE=0

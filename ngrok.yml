@@ -1,0 +1,18 @@
+version: "3"
+agent:
+  authtoken: 31ss9lFZ9h2BHtt9Lnnh25CkCHl_6AU6hZNuNtW913LBzkq1X
+
+tunnels:
+  pii-service:
+    proto: http
+    addr: 8000
+    schemes:
+      - https
+    inspect: false
+    
+  tox-service:
+    proto: http
+    addr: 8001
+    schemes:
+      - https
+    inspect: false
